@@ -11,4 +11,6 @@ Copyright (c) 2021 Camel Lu
 from controller.handle_net_worth import handle_net_worth_data
 
 if __name__ == "__main__":
-    handle_net_worth_data()
+    code = "001043"
+    month = '2021-07'
+    handle_net_worth_data(code, month=month)

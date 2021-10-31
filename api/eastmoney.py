@@ -20,9 +20,8 @@ class ApiEastMoney(BaseApier):
         super().__init__()
 
     def get_fund_net_worth(self, *, code, start_date, end_date, page_index, page_size):
-        timestamp = round(time.time() * 1000)
+        timestamp = int(time.time() * 1000)
         callback = "jQuery18306767772725117951_" + str(timestamp)
-        print("timestamp", timestamp)
         url = "http://api.fund.eastmoney.com/f10/lsjz?callback={callback}&fundCode={code}&pageIndex={page_index}&pageSize={page_size}&startDate={start_date}&endDate={end_date}&_={timestamp}".format(
             callback=callback,
             code=code,
@@ -34,13 +33,12 @@ class ApiEastMoney(BaseApier):
         )
         headers = self.get_client_headers()
         res = requests.get(url, headers=headers)
-
         try:
             if res.status_code == 200:
                 data_text = res.text.replace(callback, '')[1:-1]
                 res_json = json.loads(data_text)
                 return res_json
             else:
-                print('res异常', res)
+                print('请求异常', res)
         except:
             raise('中断')
