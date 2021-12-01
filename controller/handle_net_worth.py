@@ -74,13 +74,12 @@ def handle_net_worch_month_data(code, month):
         start_date_net = pd_net_wortch_list.head(1).iat[0, 0]
     diff_net = round(end_date_net - start_date_net, 4)
     period_percent = round(diff_net / start_date_net * 100, 2)
-    print("code:{0}, date:{1}, precent:{2}".format(
-        code, month, str(period_percent) + '%'))
+    return period_percent
 
 
 def handle_net_worth_data(code, *, month: date = None):
     if month:
-        handle_net_worch_month_data(code, month)
+        return handle_net_worch_month_data(code, month)
     else:
         print('目前只支持查询某个月份净值涨幅')
 
