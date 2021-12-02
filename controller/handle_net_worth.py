@@ -55,11 +55,13 @@ def handle_net_worch_month_data(code, month):
     rsp = fetch_net_data(code, start_date, end_date)
     pd_net_wortch_list = process_rsp_data(rsp)
     if pd_net_wortch_list.empty:
+        print(code, 'start_date', start_date, start_date)
+
         return
     end_date_net = pd_net_wortch_list.head(
-        1).iat[0, 0]
+        1).iat[0, 1]
     if start_date.format('YYYY-MM-DD') in pd_net_wortch_list.index:  # 判断是否开始时间是否在当前数据内
-        start_date_net = pd_net_wortch_list.tail(1).iat[0, 0]
+        start_date_net = pd_net_wortch_list.tail(1).iat[0, 1]
     else:
         '''
         找不到上个月最后一天,则重新查询上个月所有交易日净值,取最后时间
@@ -70,8 +72,9 @@ def handle_net_worch_month_data(code, month):
         rsp = fetch_net_data(code, start_date, end_date)
         pd_net_wortch_list = process_rsp_data(rsp)
         if pd_net_wortch_list.empty:
+            print(code, 'start_date', start_date, start_date)
             return
-        start_date_net = pd_net_wortch_list.head(1).iat[0, 0]
+        start_date_net = pd_net_wortch_list.head(1).iat[0, 1]
     diff_net = round(end_date_net - start_date_net, 4)
     period_percent = round(diff_net / start_date_net * 100, 2)
     return period_percent

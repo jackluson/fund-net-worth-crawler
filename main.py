@@ -8,7 +8,63 @@ Author: luxuemin2108@gmail.com
 Copyright (c) 2021 Camel Lu
 '''
 
+import pandas as pd
 from controller.handle_net_worth import handle_net_worth_data
+
+
+def recall_high_scores_fund():
+    file_path = '/Users/admin/personal/anchor_plan/fund-morning-star-crawler/outcome/数据整理/funds/high-score-funds.xlsx'
+    xls = pd.ExcelFile(file_path, engine='openpyxl')
+    print("xls.sheet_names", xls.sheet_names)
+    year = '2021'
+    practice_percent = 1
+    quarter_map = {
+        '2020-Q4': [2, 3, 4],
+        '2021-Q1': [5, 6, 7],
+        '2021-Q2': [8, 9, 10],
+        '2021-Q3': [11, 12, 1],
+    }
+    for sheet_name in (xls.sheet_names):
+        # item_quarter_data = [sheet_name]
+        df_cur_sheet = xls.parse(sheet_name, converters={'代码': str})
+        radio = round(1 / len(df_cur_sheet), 3)
+        print("radio", radio)
+        year_percent = 1
+        month_list = quarter_map[sheet_name]
+        print("month_list", month_list)
+        for month in range(2, 12, 1):
+            av_percent = 0
+            date = year + '-' + (str(month) if month > 9 else '0' + str(month))
+            for index, row in df_cur_sheet.iterrows():
+                # print('index', index, "row", row)
+                code = row['代码']
+                name = row['名称']
+                period_percent = handle_net_worth_data(code, month=date)
+                av_percent += period_percent * radio
+                # print("code:{code},name:{name} date:{date}, percent:{percent}".format(
+                #     code=code,
+                #     name=name,
+                #     date=date,
+                #     percent=str(period_percent) + '%'
+                # ))
+            print('{sheet_name}组合{date}月份组合加权平均涨幅{percent}'.format(
+                sheet_name=sheet_name,
+                date=date,
+                percent=str(round(av_percent, 4)) + '%'
+            ))
+
+            year_percent = round((1 + av_percent/100)*year_percent, 4)
+            if month in month_list:
+                practice_percent = round(
+                    (1 + av_percent/100)*practice_percent, 4)
+                print("practice_percent", practice_percent)
+        print('{sheet_name}组合{year}年份加权平均涨幅{percent}'.format(
+            sheet_name=sheet_name,
+            year=year,
+            percent=str(round((year_percent - 1) * 100, 4)) + '%'
+        ))
+    print('practice_percent', practice_percent)
+
 
 if __name__ == "__main__":
     fund_list = [
@@ -37,7 +93,7 @@ if __name__ == "__main__":
             'radio': 0.1
         }
     ]
-    month = '2021-10'
+    month = '2021-11'
     av_percent = 0
     for fund in fund_list:
         code = fund.get('code')
