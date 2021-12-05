@@ -25,15 +25,12 @@ def backtesting_high_scores_fund():
         '2021-Q3': [11, 12, 1],
     }
     for sheet_name in (xls.sheet_names):
-        # item_quarter_data = [sheet_name]
         df_cur_sheet = xls.parse(sheet_name, converters={'代码': str})
-        # radio = round(1 / len(df_cur_sheet), 3)
         count = 5
         radio = 1 / count
         print("radio", radio)
         year_percent = 1
         month_list = quarter_map[sheet_name]
-        # print("month_list", month_list)
         for month in range(2, 12, 1):
             if month in month_list:
                 av_percent = 0
@@ -66,7 +63,6 @@ def backtesting_high_scores_fund():
                 #     date=date,
                 #     percent=str(round(av_percent, 4)) + '%'
                 # ))
-
                 year_percent = round((1 + av_percent/100)*year_percent, 4)
                 practice_percent = round(
                     (1 + av_percent/100)*practice_percent, 4)
@@ -84,7 +80,49 @@ def backtesting_high_scores_fund():
     print('practice_percent', practice_percent, 'count', count)
 
 
-def fund_pof():
+def backtesting_fund_portfolios_year():
+    sheet_name = '2021-Q3'
+    year = '2020'
+    file_path = '/Users/admin/personal/anchor_plan/fund-morning-star-crawler/outcome/数据整理/funds/high-score-funds.xlsx'
+    xls = pd.ExcelFile(file_path, engine='openpyxl')
+    # item_quarter_data = [sheet_name]
+    df_cur_sheet = xls.parse(sheet_name, converters={'代码': str})
+    # radio = round(1 / len(df_cur_sheet), 3)
+    count = 5
+    radio = 1 / count
+    print("radio", radio)
+    year_percent = 1
+    # print("month_list", month_list)
+    for month in range(1, 13):
+        av_percent = 0
+        date = year + '-' + (str(month) if month >
+                             9 else '0' + str(month))
+        for index, row in df_cur_sheet.iterrows():
+            # print("index", index)
+            # print('index', index, "row", row)
+            # if index >= 15 or index < 5:
+            if index >= count:
+                continue
+            code = row['代码']
+            name = row['名称']
+            period_percent = handle_net_worth_data(code, month=date)
+            print("code:{code},name:{name} date:{date}, percent:{percent}".format(
+                code=code,
+                name=name,
+                date=date,
+                percent=str(period_percent) + '%'
+            ))
+            av_percent += round(period_percent * radio, 4)
+        year_percent = round((1 + av_percent/100)*year_percent, 4)
+        print('{sheet_name}组合{date}月份组合加权平均涨幅{percent}, 年化收益率{year_percent}'.format(
+            sheet_name=sheet_name,
+            date=date,
+            percent=str(round(av_percent, 4)) + '%',
+            year_percent=str(round(year_percent, 4)) + '%'
+        ))
+
+
+def backtesting_fund_portfolios_month():
     fund_list = [
         {
             'code': "001811",
@@ -125,4 +163,6 @@ def fund_pof():
 
 
 if __name__ == "__main__":
-    backtesting_high_scores_fund()
+    # backtesting_high_scores_fund()
+    # backtesting_fund_portfolios_year()
+    backtesting_fund_portfolios_month()
