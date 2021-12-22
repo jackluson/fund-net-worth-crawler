@@ -32,60 +32,65 @@ def process_rsp_data(rsp):
 
 def fetch_net_data(code, start_date, end_date):
     each_api_east_money = ApiEastMoney()
-    end_date_str = end_date.format('YYYY-MM-DD')
-    start_date_str = start_date.format('YYYY-MM-DD')
+    # nd_date_str = end_date.format('YYYY-MM-DD')
+    # start_date_str = start_date.format('YYYY-MM-DD')e
     page_index = 1
     page_size = 30
     rsp = each_api_east_money.get_fund_net_worth(
         code=code,
-        start_date=start_date_str,
-        end_date=end_date_str,
+        start_date=start_date,
+        end_date=end_date,
         page_index=page_index,
         page_size=page_size,
     )
     return rsp
 
 
-def handle_net_worch_month_data(code, month):
+def process_date_cur(date):
+    if type(date) is str:
+        start_date = arrow.get(date)
+        # start_date = start_date.shift(days=-1)
+        end_date = start_date.dehumanize(
+            "in a month").shift(days=-1)  # 当前月最后一天
+        return {
+            'start_date': start_date.format('YYYY-MM-DD'),
+            'end_date': end_date.format('YYYY-MM-DD')
+        }
+
+
+def handle_net_worth_month_data(code, *, month=None, date_dict):
+    if month:
+        date_dict = process_date_cur(month)
+    print("date_dict", date_dict, date_dict.get('start_date'))
     """暂时没有考虑分红,拆分情况导致净值异常情况
     """
-    start_date = arrow.get(month)
-    start_date = start_date.shift(days=-1)
-    end_date = start_date.dehumanize("in a month")
+    start_date = date_dict.get('start_date')
+    end_date = date_dict.get('end_date')
+    # exit()
     rsp = fetch_net_data(code, start_date, end_date)
     pd_net_wortch_list = process_rsp_data(rsp)
-    is_use_cumulative_net = 1
+    dimension = 'accumulate_net'  # unit_net
     if pd_net_wortch_list.empty:
         print(code, 'start_date', start_date, start_date)
-
         return
-    end_date_net = pd_net_wortch_list.head(
-        1).iat[0, is_use_cumulative_net]
-    if start_date.format('YYYY-MM-DD') in pd_net_wortch_list.index:  # 判断是否开始时间是否在当前数据内
-        start_date_net = pd_net_wortch_list.tail(
-            1).iat[0, is_use_cumulative_net]
-    else:
-        '''
-        找不到上个月最后一天,则重新查询上个月所有交易日净值,取最后时间
-        '''
-        # 先求上一个月最后一天净值
-        start_date = arrow.get(month).dehumanize("a month ago")  # 从前一天计算
-        end_date = start_date.dehumanize("in a month").shift(days=-1)
-        rsp = fetch_net_data(code, start_date, end_date)
-        pd_net_wortch_list = process_rsp_data(rsp)
-        if pd_net_wortch_list.empty:
-            print(code, 'start_date', start_date, start_date)
-            return
-        start_date_net = pd_net_wortch_list.head(
-            1).iat[0, is_use_cumulative_net]
-    diff_net = round(end_date_net - start_date_net, 4)
-    period_percent = round(diff_net / start_date_net * 100, 2)
+    end_date_net = pd_net_wortch_list.loc[pd_net_wortch_list.index[0]][dimension]
+
+    # if start_date in pd_net_wortch_list.index:  # 判断是否开始时间是否在当前数据内
+    start_date_pecent = pd_net_wortch_list.loc[pd_net_wortch_list.index[-1]
+                                               ]['percent'] / 100
+    last_start_date_net = round(pd_net_wortch_list.loc[pd_net_wortch_list.index[-1]][dimension] / (
+        1+start_date_pecent), 4)
+
+    diff_net = round(end_date_net - last_start_date_net, 4)
+    period_percent = round(diff_net / last_start_date_net * 100, 2)
     return period_percent
 
 
-def handle_net_worth_data(code, *, month: date = None):
+def handle_net_worth_data(code, *, month=None, date=None):
     if month:
-        return handle_net_worch_month_data(code, month)
+        return handle_net_worth_month_data(code, month=month)
+    if date:
+        return handle_net_worth_month_data(code, date_dict=date)
     else:
         print('目前只支持查询某个月份净值涨幅')
 
