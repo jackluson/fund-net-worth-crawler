@@ -58,27 +58,26 @@ def process_date_cur(date):
         }
 
 
-def handle_net_worth_month_data(code, *, month=None, date_dict):
+def handle_net_worth_month_data(code, *, month=None, date_dict=None, dimension="accumulate_net"):
     if month:
         date_dict = process_date_cur(month)
-    print("date_dict", date_dict, date_dict.get('start_date'))
     """暂时没有考虑分红,拆分情况导致净值异常情况
     """
     start_date = date_dict.get('start_date')
     end_date = date_dict.get('end_date')
     # exit()
     rsp = fetch_net_data(code, start_date, end_date)
-    pd_net_wortch_list = process_rsp_data(rsp)
-    dimension = 'accumulate_net'  # unit_net
-    if pd_net_wortch_list.empty:
+    pd_net_worth_list = process_rsp_data(rsp)
+    # dimension = 'accumulate_net'  # unit_net
+    if pd_net_worth_list.empty:
         print(code, 'start_date', start_date, start_date)
         return
-    end_date_net = pd_net_wortch_list.loc[pd_net_wortch_list.index[0]][dimension]
+    end_date_net = pd_net_worth_list.loc[pd_net_worth_list.index[0]][dimension]
 
-    # if start_date in pd_net_wortch_list.index:  # 判断是否开始时间是否在当前数据内
-    start_date_pecent = pd_net_wortch_list.loc[pd_net_wortch_list.index[-1]
-                                               ]['percent'] / 100
-    last_start_date_net = round(pd_net_wortch_list.loc[pd_net_wortch_list.index[-1]][dimension] / (
+    # if start_date in pd_net_worth_list.index:  # 判断是否开始时间是否在当前数据内
+    start_date_pecent = pd_net_worth_list.loc[pd_net_worth_list.index[-1]
+                                              ]['percent'] / 100
+    last_start_date_net = round(pd_net_worth_list.loc[pd_net_worth_list.index[-1]][dimension] / (
         1+start_date_pecent), 4)
 
     diff_net = round(end_date_net - last_start_date_net, 4)
@@ -86,11 +85,11 @@ def handle_net_worth_month_data(code, *, month=None, date_dict):
     return period_percent
 
 
-def handle_net_worth_data(code, *, month=None, date=None):
+def handle_net_worth_data(code, *, month=None, date=None, dimension='accumulate_net'):
     if month:
-        return handle_net_worth_month_data(code, month=month)
+        return handle_net_worth_month_data(code, month=month, dimension=dimension)
     if date:
-        return handle_net_worth_month_data(code, date_dict=date)
+        return handle_net_worth_month_data(code, date_dict=date, dimension=dimension)
     else:
         print('目前只支持查询某个月份净值涨幅')
 

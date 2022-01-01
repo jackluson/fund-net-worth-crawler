@@ -122,47 +122,100 @@ def backtesting_fund_portfolios_year():
         ))
 
 
-def backtesting_fund_portfolios_month():
-    fund_list = [
-        {
-            'code': "001811",
-            'radio': 0.2
-        },
-        {
-            'code': '001054',
-            'radio': 0.2
-        },
-        {
-            'code': '000991',
-            'radio': 0.1
-        },
-        {
-            'code': '540003',
-            'radio': 0.2
-        },
-        {
-            'code': '163409',
-            'radio': 0.2
-        },
-        {
-            'code': '000547',
-            'radio': 0.1
-        }
-    ]
-    month = '2021-11'
+def backtesting_fund_portfolios_month(fund_list, month):
     av_percent = 0
     for fund in fund_list:
         code = fund.get('code')
         radio = fund.get('radio')
-        period_percent = handle_net_worth_data(code, month=month)
+        # date = {
+        #     'start_date': '2021-12-01',
+        #     'end_date': '2021-12-22',
+        # }
+        period_percent = handle_net_worth_data(
+            code, month=month, dimension='unit_net')
+        fund['percent'] = str(period_percent) + '%'
         av_percent += period_percent * radio
-        print("code:{0}, date:{1}, precent:{2}".format(
-            code, month, str(period_percent) + '%'))
-    av_percent = round(av_percent, 4)
+        # print("code:{0}, date:{1}, precent:{2}".format(
+        #     code, month, str(period_percent) + '%'))
+    av_percent = round(av_percent, 2)
+    df_fund_list = pd.DataFrame(fund_list)
+    df_fund_list['radio'] = (df_fund_list['radio'] * 100).astype(str) + '%'
+    df_fund_list.sort_values(by='percent', inplace=True,
+                             ascending=False, ignore_index=True)
+    df_fund_list.rename(columns={
+        "name": "基金名称",
+        "code": "基金代码",
+        "percent": "基金涨幅",
+        "radio": "组合占比",
+    }, inplace=True)
+    df_fund_list.set_index('基金名称', inplace=True)
+    # print(df_fund_list)
+    print(df_fund_list.to_markdown())
     print('{0}月份组合加权平均涨幅{1}'.format(month, str(av_percent) + '%'))
 
 
 if __name__ == "__main__":
     # backtesting_high_scores_fund()
     # backtesting_fund_portfolios_year()
-    backtesting_fund_portfolios_month()
+    fund_list = [
+        {
+            'code': "001811",
+            'name': '中欧明睿新常态混合A',
+            'radio': 0.2,
+        },
+        {
+            'code': '001054',
+            'name': '工银新金融股票A',
+            'radio': 0.2
+        },
+        {
+            'code': '000991',
+            'name': '工银战略转型股票A',
+            'radio': 0.1
+        },
+        {
+            'code': '540003',
+            'name': '汇丰晋信动态策略混合A',
+            'radio': 0.2
+        },
+        {
+            'code': '163409',
+            'name': '兴全绿色投资混合(LOF)',
+            'radio': 0.2
+        },
+        {
+            'code': '000547',
+            'name': '建信健康民生混合',
+            'radio': 0.1
+        }
+    ]
+    fund_list_other = [
+        {
+            'code': "519002",
+            'radio': 0.2,
+            'name': '华安安信消费混合'
+        },
+        {
+            'code': "163807",
+            'name': '中银优选混合',
+            'radio': 0.2
+        },
+        {
+            'code': "000547",
+            'name': '建信健康民生混合',
+            'radio': 0.2
+        },
+        {
+            'code': "001054",
+            'name': '工银新金融股票',
+            'radio': 0.2
+        },
+        {
+            'code': "001694",
+            'name': '华安沪港深外延增长灵活配置混合',
+            'radio': 0.2
+        }
+    ]
+    month = '2021-12'
+
+    backtesting_fund_portfolios_month(fund_list_other, month)
