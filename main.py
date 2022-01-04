@@ -13,6 +13,9 @@ from controller.handle_net_worth import handle_net_worth_data
 
 
 def backtesting_high_scores_fund():
+    """
+    高分系列基金季度轮动回测
+    """
     file_path = '/Users/admin/personal/anchor_plan/fund-morning-star-crawler/outcome/数据整理/funds/high-score-funds.xlsx'
     xls = pd.ExcelFile(file_path, engine='openpyxl')
     print("xls.sheet_names", xls.sheet_names)
@@ -37,7 +40,6 @@ def backtesting_high_scores_fund():
                 date = year + '-' + (str(month) if month >
                                      9 else '0' + str(month))
                 for index, row in df_cur_sheet.iterrows():
-                    # print("index", index)
                     # print('index', index, "row", row)
                     # if index >= 15 or index < 5:
                     if index >= count:
@@ -52,17 +54,6 @@ def backtesting_high_scores_fund():
                         percent=str(period_percent) + '%'
                     ))
                     av_percent += round(period_percent * radio, 4)
-                    # print("code:{code},name:{name} date:{date}, percent:{percent}".format(
-                    #     code=code,
-                    #     name=name,
-                    #     date=date,
-                    #     percent=str(period_percent) + '%'
-                    # ))
-                # print('{sheet_name}组合{date}月份组合加权平均涨幅{percent}'.format(
-                #     sheet_name=sheet_name,
-                #     date=date,
-                #     percent=str(round(av_percent, 4)) + '%'
-                # ))
                 year_percent = round((1 + av_percent/100)*year_percent, 4)
                 practice_percent = round(
                     (1 + av_percent/100)*practice_percent, 4)
@@ -81,25 +72,25 @@ def backtesting_high_scores_fund():
 
 
 def backtesting_fund_portfolios_year():
+    """
+    某个季度高分系列基金前几名基金年化回撤
+    """
     sheet_name = '2021-Q3'
     year = '2020'
     file_path = '/Users/admin/personal/anchor_plan/fund-morning-star-crawler/outcome/数据整理/funds/high-score-funds.xlsx'
     xls = pd.ExcelFile(file_path, engine='openpyxl')
-    # item_quarter_data = [sheet_name]
     df_cur_sheet = xls.parse(sheet_name, converters={'代码': str})
     # radio = round(1 / len(df_cur_sheet), 3)
     count = 5
     radio = 1 / count
     print("radio", radio)
     year_percent = 1
-    # print("month_list", month_list)
     for month in range(1, 13):
         av_percent = 0
         date = year + '-' + (str(month) if month >
                              9 else '0' + str(month))
         for index, row in df_cur_sheet.iterrows():
             # print("index", index)
-            # print('index', index, "row", row)
             # if index >= 15 or index < 5:
             if index >= count:
                 continue
@@ -138,7 +129,8 @@ def backtesting_fund_portfolios_month(fund_list, month):
         # print("code:{0}, date:{1}, precent:{2}".format(
         #     code, month, str(period_percent) + '%'))
     av_percent = round(av_percent, 2)
-    df_fund_list = pd.DataFrame(fund_list)
+    df_fund_list = pd.DataFrame(
+        fund_list, columns=["name", "code", "percent", "radio"])
     df_fund_list['radio'] = (df_fund_list['radio'] * 100).astype(str) + '%'
     df_fund_list.sort_values(by='percent', inplace=True,
                              ascending=False, ignore_index=True)
@@ -155,8 +147,6 @@ def backtesting_fund_portfolios_month(fund_list, month):
 
 
 if __name__ == "__main__":
-    # backtesting_high_scores_fund()
-    # backtesting_fund_portfolios_year()
     fund_list = [
         {
             'code': "001811",
@@ -217,5 +207,4 @@ if __name__ == "__main__":
         }
     ]
     month = '2021-12'
-
-    backtesting_fund_portfolios_month(fund_list_other, month)
+    backtesting_fund_portfolios_month(fund_list, month)
