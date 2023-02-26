@@ -8,8 +8,8 @@ Author: luxuemin2108@gmail.com
 Copyright (c) 2021 Camel Lu
 '''
 
-from controller.backtesting import backtesting
-
+from controller.backtesting import backtesting, backtesting_high_scores_fund
 
 if __name__ == "__main__":
-    backtesting()
+    # backtesting()
+    backtesting_high_scores_fund()

@@ -72,11 +72,11 @@ def handle_net_worth_month_data(code, *, month=None, date_dict=None, dimension="
     if pd_net_worth_list.empty:
         print(code, 'start_date', start_date, start_date)
         return
-    end_date_net = pd_net_worth_list.loc[pd_net_worth_list.index[0]][dimension]
 
+    end_date_net = pd_net_worth_list.loc[pd_net_worth_list.index[0]][dimension]
     # if start_date in pd_net_worth_list.index:  # 判断是否开始时间是否在当前数据内
-    start_date_pecent = pd_net_worth_list.loc[pd_net_worth_list.index[-1]
-                                              ]['percent'] / 100
+    start_date_pecent = float(pd_net_worth_list.loc[pd_net_worth_list.index[-1]
+                                                    ]['percent']) / 100
     last_start_date_net = round(pd_net_worth_list.loc[pd_net_worth_list.index[-1]][dimension] / (
         1+start_date_pecent), 4)
 

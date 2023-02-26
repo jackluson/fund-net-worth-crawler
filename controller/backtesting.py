@@ -9,50 +9,65 @@ def backtesting_high_scores_fund():
     file_path = '/Users/admin/personal/anchor_plan/fund-morning-star-crawler/outcome/数据整理/funds/high-score-funds.xlsx'
     xls = pd.ExcelFile(file_path, engine='openpyxl')
     print("xls.sheet_names", xls.sheet_names)
-    year = '2021'
     practice_percent = 1
     quarter_map = {
         '2020-Q4': [2, 3, 4],
         '2021-Q1': [5, 6, 7],
         '2021-Q2': [8, 9, 10],
         '2021-Q3': [11, 12, 1],
+        '2021-Q4': [2, 3, 4],
+        '2022-Q1': [5, 6, 7],
+        '2022-Q2': [8, 9, 10],
+        '2022-Q3': [11, 12, 1],
     }
-    for sheet_name in (xls.sheet_names):
+    # for sheet_name in (xls.sheet_names):
+    for sheet_name in quarter_map.keys():
         df_cur_sheet = xls.parse(sheet_name, converters={'代码': str})
         count = 5
         radio = 1 / count
-        print("radio", radio)
         year_percent = 1
+        if not sheet_name in quarter_map:
+            continue
         month_list = quarter_map[sheet_name]
-        for month in range(2, 12, 1):
-            if month in month_list:
-                av_percent = 0
-                date = year + '-' + (str(month) if month >
+        for month in month_list:
+            av_percent = 0
+            cur_year = sheet_name.split('-')[0]
+            quarter_index = sheet_name.split('-')[1]
+            if quarter_index == 'Q4':
+                cur_year = str(int(cur_year) + 1)
+            if quarter_index == 'Q3' and month == 1:
+                cur_year = str(int(cur_year) + 1)
+            date = cur_year + '-' + (str(month) if month >
                                      9 else '0' + str(month))
-                for index, row in df_cur_sheet.iterrows():
-                    # print('index', index, "row", row)
-                    # if index >= 15 or index < 5:
-                    if index >= count:
-                        continue
-                    code = row['代码']
-                    name = row['名称']
-                    period_percent = handle_net_worth_data(code, month=date)
-                    print("code:{code},name:{name} date:{date}, percent:{percent}".format(
-                        code=code,
-                        name=name,
-                        date=date,
-                        percent=str(period_percent) + '%'
-                    ))
-                    av_percent += round(period_percent * radio, 4)
-                year_percent = round((1 + av_percent/100)*year_percent, 4)
-                practice_percent = round(
-                    (1 + av_percent/100)*practice_percent, 4)
-                print('{sheet_name}组合{date}月份组合加权平均涨幅{percent}'.format(
-                    sheet_name=sheet_name,
+            memo_row = []
+            for index, row in df_cur_sheet.iterrows():
+                # print('index', index, "row", row)
+                # if index >= 15 or index < 5:
+                if len(memo_row) >= count:
+                    continue
+                code = row['代码']
+                name = row['名称']
+                manager = row['基金经理']
+                if manager in memo_row:
+                    continue
+                memo_row.append(manager)
+                period_percent = handle_net_worth_data(code, month=date)
+                print("code:{code},name:{name} date:{date}, percent:{percent}".format(
+                    code=code,
+                    name=name,
                     date=date,
-                    percent=str(round(av_percent, 4)) + '%'
+                    percent=str(period_percent) + '%'
                 ))
-                print("practice_percent", practice_percent)
+                av_percent += round(period_percent * radio, 4)
+            year_percent = round((1 + av_percent/100)*year_percent, 4)
+            practice_percent = round(
+                (1 + av_percent/100)*practice_percent, 4)
+            print('{sheet_name}组合-{date}月份组合加权平均涨幅{percent}'.format(
+                sheet_name=sheet_name,
+                date=date,
+                percent=str(round(av_percent, 4)) + '%'
+            ))
+            print("practice_percent", practice_percent)
         # print('{sheet_name}组合{year}年份加权平均涨幅{percent}'.format(
         #     sheet_name=sheet_name,
         #     year=year,
@@ -73,7 +88,6 @@ def backtesting_fund_portfolios_year():
     # radio = round(1 / len(df_cur_sheet), 3)
     count = 5
     radio = 1 / count
-    print("radio", radio)
     year_percent = 1
     for month in range(1, 13):
         av_percent = 0
@@ -237,3 +251,7 @@ def backtesting():
     ]
     month = '2022-01'
     backtesting_fund_portfolios_month(fund_group_history_list[1], month)
+
+
+if __name__ == "__main__":
+    backtesting_high_scores_fund()
