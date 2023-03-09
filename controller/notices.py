@@ -9,7 +9,8 @@ Copyright (c) 2022 Camel Lu
 from api.eastmoney import ApiEastMoney
 from datetime import datetime
 from dateutil import parser
-from utils.file import write_fund_json_data, update_xlsx_file
+from dateutil.relativedelta import *
+from utils.file import update_xlsx_file
 import pandas as pd
 import os
 
@@ -31,14 +32,15 @@ def fetch_st_stocks():
 
 
 def check_notices():
-    code = '600654'
-    target_date_str = '2023-03-04'
+    # target_date_str = '2023-03-08'
     st_stocks = fetch_st_stocks()
-    print("st_stocks", len(st_stocks))
-    # target_date = datetime.now().strftime("%Y-%m-%d")
+    print(f"一共有{len(st_stocks)}只ST股票")
+    target_date_str = datetime.now().strftime("%Y-%m-%d")
     target_date = parser.parse(target_date_str)
+    next_target_date = target_date + relativedelta(days=1)
     update_count = 0
     update_stocks = []
+    is_after_current_day = False
     update_notices = []
     for stock in st_stocks:
         stock_name = stock.get('f14')
@@ -47,8 +49,8 @@ def check_notices():
         news_count = 0
         for item in notice_list:
             notice_date = parser.parse(item['notice_date'])
-            if notice_date >= target_date:
-                # print('new')
+            publish_date = parser.parse(item['eiTime'][0:-4])
+            if (is_after_current_day or next_target_date >= publish_date) and publish_date >= target_date:
                 print(stock_name, stock_code, item['title'])
                 if news_count == 0:
                     update_count += 1
@@ -59,7 +61,7 @@ def check_notices():
                     'title': item['title'],
                     'notice_date': item['notice_date'],
                     'eiTime': item['eiTime'],
-                    'link': 'https://data.eastmoney.com/notices/detail/' + stock_code + item['art_code'] + '.html',
+                    'link': f"https://data.eastmoney.com/notices/detail/{stock_code}/{item['art_code']}.html",
                 })
                 # if news_count > 2:
                 #     break
@@ -70,22 +72,29 @@ def check_notices():
                 'stock_name': stock_name,
                 'stock_code': stock_code,
                 'news_count': news_count,
-                # 'update_notices': 'update_notices'
             })
-    print(f"共有{update_count}只ST股更新了公告")
     file_dir = f'{os.getcwd()}/data/ST公告/'
-
-    if not os.path.exists(file_dir):
-        os.makedirs(file_dir)
-        print("目录新建成功：%s" % file_dir)
-    # display_date = datetime.now().strftime("%Y-%m-%d")
-    # lastest_data = fetch_notice_data(code)
-    # print("lastest_data", lastest_data)
     file_path = f'{file_dir}/{target_date_str}.xlsx'
     # file_summary_path = f'{file_dir}/summary.xlsx'
-    # df.rename(columns=rename_map).reset_index(drop=True)
-    file_detail_data = pd.DataFrame(update_notices).reset_index(drop=True)
-    file_summary_data = pd.DataFrame(update_stocks).reset_index(drop=True)
+    detail_map = {
+        'stock_name': '股票名称',
+        'stock_code': '股票代码',
+        'title': '公告标题',
+        'eiTime': '公告发布时间',
+        'notice_date': '公告日期',
+        'link': '公告链接',
+    }
+    summay_map = {
+        'stock_name': '股票名称',
+        'stock_code': '股票代码',
+        'news_count': '公告数量'
+    }
+    print(f"{target_date_str}当天(截至{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})共有{update_count}只ST股更新了{len(update_notices)}条公告")
+    file_detail_data = pd.DataFrame(update_notices).rename(
+        columns=detail_map).reset_index(drop=True)
+    # print(file_detail_data)
+    file_summary_data = pd.DataFrame(update_stocks).rename(
+        columns=summay_map).reset_index(drop=True)
     update_xlsx_file(file_path, file_detail_data, '公告明细')
     update_xlsx_file(file_path, file_summary_data, '公告汇总')
 

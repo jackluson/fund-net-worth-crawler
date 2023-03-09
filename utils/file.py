@@ -25,7 +25,7 @@ def write_fund_json_data(data, filename, file_dir=None):
         f.close()
 
 
-def update_xlsx_file(path, df_data, sheet_name):
+def update_xlsx_file(path, df_data, sheet_name, *, index=False):
     try:
         if os.path.exists(path):
             writer = pd.ExcelWriter(path, engine='openpyxl')
@@ -35,17 +35,17 @@ def update_xlsx_file(path, df_data, sheet_name):
                 del book[sheet_name]
             if len(book.sheetnames) == 0:
                 df_data.to_excel(
-                    path, sheet_name=sheet_name)
+                    path, sheet_name=sheet_name, index=index)
                 return
             else:
                 writer.book = book
             df_data.to_excel(
-                writer, sheet_name=sheet_name)
+                writer, sheet_name=sheet_name, index=index)
 
             writer.save()
             writer.close()
         else:
             df_data.to_excel(
-                path, sheet_name=sheet_name)
+                path, sheet_name=sheet_name, index=index)
     except BaseException:
         raise BaseException('更新excel失败')
