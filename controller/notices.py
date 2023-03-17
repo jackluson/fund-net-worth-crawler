@@ -41,18 +41,10 @@ def fetch_st_stocks():
     return process_st_stocks
 
 
-listen_stocks = [
+pre_stocks = [
     {
         "code": '000498',
         "name": '山东路桥'
-    },
-    {
-        "code": '301085',
-        "name": '亚康股份'
-    },
-    {
-        "code": '600810',
-        "name": '神马股份'
     },
     {
         "code": '300967',
@@ -81,10 +73,6 @@ listen_stocks = [
     {
         "code": '300918',
         "name": '南山智尚'
-    },
-    {
-        "code": '601666',
-        "name": '平煤股份'
     },
     {
         "code": '301046',
@@ -138,26 +126,102 @@ listen_stocks = [
         "code": '002120',
         "name": '韵达股份'
     },
+]
+
+position_stocks = [
     {
-        "code": '603890',
-        "name": '春秋电子'
+        "code": '002427',
+        "name": '*ST尤夫'
     },
+    {
+        "code": '600654',
+        "name": '*ST中安'
+    },
+    {
+        "code": '600078',
+        "name": 'ST澄星'
+    },
+    {
+        "code": '600547',
+        "name": '山东黄金'
+    },
+    {
+        "code": '601233',
+        "name": '桐昆股份'
+    },
+    {
+        "code": '000063',
+        "name": '中兴股份'
+    },
+    {
+        "code": '600887',
+        "name": '伊利股份'
+    },
+    {
+        "code": '600031',
+        "name": '三一重工'
+    },
+    {
+        "code": '600585',
+        "name": '海螺水泥'
+    },
+    {
+        "code": '002624',
+        "name": '完美世界'
+    },
+    {
+        "code": '300326',
+        "name": '凯利泰'
+    },
+    {
+        "code": '603609',
+        "name": '禾丰股份'
+    },
+    {
+        "code": '600461',
+        "name": '洪城环境'
+    },
+    {
+        "code": '002157',
+        "name": '正邦科技'
+    },
+    {
+        "code": '603569',
+        "name": '长久物流'
+    },
+    {
+        "code": '600438',
+        "name": '通威股份'
+    },
+    {
+        "code": '002008',
+        "name": '大族激光'
+    }
 ]
 
 
 def check_notices():
-    target_date_str = '2023-03-04'
-    # target_date_str = datetime.now().strftime("%Y-%m-%d")
+    # target_date_str = '2023-03-04'
+    target_date_str = datetime.now().strftime("%Y-%m-%d")
     target_date = parser.parse(target_date_str)
-    is_listen = True
-    if is_listen:
-        stocks = listen_stocks
-        file_dir = f'{os.getcwd()}/data/正股公告/'
+    input_value = input("请输入下列序号执行操作:\n \
+        1.“持有标的公告” \n \
+        2.“预发转债标的公告” \n \
+        3.“ST公告” \n \
+    输入：")
+    if input_value == '1':
+        stocks = position_stocks
+        file_dir = f'{os.getcwd()}/data/position_stocks/'
         file_path = f'{file_dir}/{target_date_str}.xlsx'
         print(f"一共有{len(stocks)}只股票")
-    else:
+    elif input_value == '2':
+        stocks = pre_stocks
+        file_dir = f'{os.getcwd()}/data/pre_notices/'
+        file_path = f'{file_dir}/{target_date_str}.xlsx'
+        print(f"一共有{len(stocks)}只股票")
+    elif input_value == '3':
         stocks = fetch_st_stocks()
-        file_dir = f'{os.getcwd()}/data/ST公告/'
+        file_dir = f'{os.getcwd()}/data/st_notices/'
         file_path = f'{file_dir}/{target_date_str}.xlsx'
         print(f"一共有{len(stocks)}只ST股票")
     next_target_date = target_date + relativedelta(days=1)
@@ -172,7 +236,7 @@ def check_notices():
         news_count = 0
         for item in notice_list:
             notice_date = parser.parse(item['notice_date'])
-            publish_date = parser.parse(item['eiTime'][0:-4])
+            publish_date = parser.parse(item['eiTime'][0:19])
             if (is_after_target_day or next_target_date >= publish_date) and publish_date >= target_date:
                 print(stock_name, stock_code, item['title'])
                 if news_count == 0:
