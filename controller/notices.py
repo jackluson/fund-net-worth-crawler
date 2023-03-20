@@ -43,6 +43,14 @@ def fetch_st_stocks():
 
 pre_stocks = [
     {
+        "code": '300705',
+        "name": '九典制药'
+    },
+    {
+        "code": '300986',
+        "name": '志特新材'
+    },
+    {
         "code": '000498',
         "name": '山东路桥'
     },
@@ -91,20 +99,8 @@ pre_stocks = [
         "name": '景旺电子'
     },
     {
-        "code": '300501',
-        "name": '海顺新材'
-    },
-    {
-        "code": '300872',
-        "name": '天阳科技'
-    },
-    {
         "code": '300879',
         "name": '大叶股份'
-    },
-    {
-        "code": '300900',
-        "name": '广联航空'
     },
     {
         "code": '603180',
@@ -201,7 +197,7 @@ position_stocks = [
 
 
 def check_notices():
-    # target_date_str = '2023-03-04'
+    # target_date_str = '2023-03-17'
     target_date_str = datetime.now().strftime("%Y-%m-%d")
     target_date = parser.parse(target_date_str)
     input_value = input("请输入下列序号执行操作:\n \
@@ -211,7 +207,7 @@ def check_notices():
     输入：")
     if input_value == '1':
         stocks = position_stocks
-        file_dir = f'{os.getcwd()}/data/position_stocks/'
+        file_dir = f'{os.getcwd()}/data/position_notices/'
         file_path = f'{file_dir}/{target_date_str}.xlsx'
         print(f"一共有{len(stocks)}只股票")
     elif input_value == '2':
