@@ -19,10 +19,14 @@ from utils.file import write_fund_json_data
 class ApiEastMoney(BaseApier):
     def __init__(self):
         super().__init__()
+        referer = 'http://fundf10.eastmoney.com/'
+        self.referer = referer
+        self.notice_api_base_url = 'https://np-anotice-stock.eastmoney.com/api'
+        self.set_client_headers(cookie_env_key='eastmoney_')
 
     def get_fund_net_worth(self, *, code, start_date, end_date, page_index, page_size):
         timestamp = int(time.time() * 1000)
-        callback = "jQuery18306767772725117951_" + str(timestamp)
+        callback = "jQuery18305757733125714872_" + str(timestamp)
         url = "http://api.fund.eastmoney.com/f10/lsjz?callback={callback}&fundCode={code}&pageIndex={page_index}&pageSize={page_size}&startDate={start_date}&endDate={end_date}&_={timestamp}".format(
             callback=callback,
             code=code,
@@ -32,8 +36,7 @@ class ApiEastMoney(BaseApier):
             page_size=page_size,
             timestamp=timestamp
         )
-        headers = self.get_client_headers()
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=self.headers)
         try:
             if res.status_code == 200:
                 data_text = res.text.replace(callback, '')[1:-1]
@@ -47,7 +50,8 @@ class ApiEastMoney(BaseApier):
     def get_notices_info(self, *, code, page_size, page_index, ann_type):
         timestamp = int(time.time() * 1000)
         callback = "jQuery112308272385073717725_" + str(timestamp)
-        url = "https://np-anotice-stock.eastmoney.com/api/security/ann?cb={callback}&sr=-1&page_size={page_size}&page_index={page_index}&pageSize={page_size}&ann_type={ann_type}&client_source=web&stock_list={stock_list}&f_node={f_node}&s_node={s_node}".format(
+        url = "{base_url}/security/ann?cb={callback}&sr=-1&page_size={page_size}&page_index={page_index}&pageSize={page_size}&ann_type={ann_type}&client_source=web&stock_list={stock_list}&f_node={f_node}&s_node={s_node}".format(
+            base_url=self.notice_api_base_url,
             callback=callback,
             page_size=page_size,
             page_index=page_index,
@@ -56,8 +60,28 @@ class ApiEastMoney(BaseApier):
             f_node=0,
             s_node=1,
         )
-        headers = self.get_client_headers()
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=self.headers)
+        try:
+            if res.status_code == 200:
+                data_text = res.text.replace(callback, '')[1:-1]
+                res_json = json.loads(data_text)
+                return res_json
+            else:
+                print('请求异常', res)
+        except:
+            raise ('中断')
+
+    def get_notice_detail(self, *, art_code):
+        timestamp = int(time.time() * 1000)
+        callback = "jQuery11230024925577532673993_" + str(timestamp)
+        url = "{base_url}/content/ann?cb={callback}&art_code={art_code}&page_index={page_index}&client_source=web&_{timestamp}".format(
+            base_url="https://np-cnotice-stock.eastmoney.com/api",
+            callback=callback,
+            art_code=art_code,
+            page_index=1,
+            timestamp=timestamp,
+        )
+        res = requests.get(url, headers=self.headers)
         try:
             if res.status_code == 200:
                 data_text = res.text.replace(callback, '')[1:-1]
@@ -71,7 +95,7 @@ class ApiEastMoney(BaseApier):
     def get_all_stocks_with_st(self, *, page_index=1, page_size=200):
         cur_date = time.strftime(
             "%Y-%m-%d", time.localtime(time.time()))
-        file_dir = os.getcwd() + '/data/json/'
+        file_dir = os.getcwd() + '/data/json/st/'
         filename = 'st_' + cur_date + '.json'
         is_exist = os.path.exists(file_dir + filename)
         if is_exist:
@@ -86,8 +110,7 @@ class ApiEastMoney(BaseApier):
             page_index=page_index,
             page_size=page_size,
         )
-        headers = self.get_client_headers()
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=self.headers)
         try:
             if res.status_code == 200:
                 data_text = res.text.replace(callback, '')[1:-2]

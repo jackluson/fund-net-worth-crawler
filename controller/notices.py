@@ -13,6 +13,14 @@ from dateutil.relativedelta import *
 from utils.file import update_xlsx_file
 import pandas as pd
 import os
+from enum import Enum
+from scripts.git import commit
+
+
+class SourceType(Enum):
+    POSITION = 1
+    PRE = 2
+    ST = 3
 
 
 def fetch_notice_data(code):
@@ -43,64 +51,52 @@ def fetch_st_stocks():
 
 pre_stocks = [
     {
+        "code": "688103",
+        "name": "国力股份"
+    },
+    {
+        "code": "300644",
+        "name": "南京聚隆"
+    },
+    {
+        'code': "301022",
+        'name': "海泰科"
+    },
+    {
+        'code': "301008",
+        'name': "宏昌科技"
+    },
+    {
+        'code': "300926",
+        'name': "博俊科技"
+    },
+    {
+        'code': '300829',
+        'name': '金丹科技'
+    },
+    {
+        "code": '300980',
+        "name": '祥源新材'
+    },
+    {
+        "code": '301098',
+        "name": '金埔园林'
+    },
+    {
+        "code": '300878',
+        "name": '维康药业'
+    },
+    {
         "code": '300705',
         "name": '九典制药'
-    },
-    {
-        "code": '300986',
-        "name": '志特新材'
-    },
-    {
-        "code": '000498',
-        "name": '山东路桥'
-    },
-    {
-        "code": '300967',
-        "name": '晓鸣股份'
-    },
-    {
-        "code": '300740',
-        "name": '水羊股份'
     },
     {
         "code": '300793',
         "name": '佳禾智能'
     },
     {
-        "code": '300787',
-        "name": '海能实业'
-    },
-    {
-        "code": '300409',
-        "name": '道氏技术'
-    },
-    {
         "code": '300452',
         "name": '山河药辅'
-    },
-    {
-        "code": '300918',
-        "name": '南山智尚'
-    },
-    {
-        "code": '301046',
-        "name": '能辉科技'
-    },
-    {
-        "code": '603051',
-        "name": '鹿山新材'
-    },
-    {
-        "code": '000528',
-        "name": '柳工'
-    },
-    {
-        "code": '603228',
-        "name": '景旺电子'
-    },
-    {
-        "code": '300879',
-        "name": '大叶股份'
     },
     {
         "code": '603180',
@@ -114,40 +110,84 @@ pre_stocks = [
         "code": '003036',
         "name": '泰坦股份'
     },
-    {
-        "code": '300480',
-        "name": '光力科技'
-    },
-    {
-        "code": '002120',
-        "name": '韵达股份'
-    },
 ]
 
 position_stocks = [
     {
-        "code": '002427',
-        "name": '*ST尤夫'
+        "code": '128114',
+        "name": '正邦转债'
     },
     {
-        "code": '600654',
-        "name": '*ST中安'
+        "code": '600241',
+        "name": 'ST时万'
+    },
+    {
+        "code": '002087',
+        "name": 'ST新纺'
+    },
+    {
+        "code": '000564',
+        "name": 'ST大集'
+    },
+    {
+        "code": '603133',
+        "name": '*ST碳元'
+    },
+    {
+        "code": '600543',
+        "name": '*ST莫高'
+    },
+    {
+        "code": '113640',
+        "name": '苏利转债'
+    },
+    {
+        "code": '110084',
+        "name": '贵燃转债'
+    },
+    {
+        "code": '113561',
+        "name": '正裕转债'
+    },
+    {
+        "code": '002717',
+        "name": '岭南转债'
+    },
+    {
+        "code": '113054',
+        "name": '绿动转债'
+    },
+    {
+        "code": '300793',
+        "name": '佳禾智能'
+    },
+    {
+        "code": '002083',
+        "name": '孚日转债'
+    },
+    {
+        "code": '601330',
+        "name": '绿动转债'
+    },
+    {
+        "code": '000895',
+        "name": '双汇发展'
+    },
+    {
+        "code": '603109',
+        "name": '神驰机电'
+    },
+    {
+        "code": '600382',
+        "name": 'ST广珠'
     },
     {
         "code": '600078',
         "name": 'ST澄星'
     },
     {
-        "code": '600547',
-        "name": '山东黄金'
-    },
-    {
         "code": '601233',
         "name": '桐昆股份'
-    },
-    {
-        "code": '000063',
-        "name": '中兴股份'
     },
     {
         "code": '600887',
@@ -162,125 +202,148 @@ position_stocks = [
         "name": '海螺水泥'
     },
     {
-        "code": '002624',
-        "name": '完美世界'
+        "code": '603007',
+        "name": '花王转债'
     },
     {
-        "code": '300326',
-        "name": '凯利泰'
-    },
-    {
-        "code": '603609',
-        "name": '禾丰股份'
-    },
-    {
-        "code": '600461',
-        "name": '洪城环境'
-    },
-    {
-        "code": '002157',
-        "name": '正邦科技'
-    },
-    {
-        "code": '603569',
-        "name": '长久物流'
-    },
-    {
-        "code": '600438',
-        "name": '通威股份'
-    },
-    {
-        "code": '002008',
-        "name": '大族激光'
+        "code": '002203',
+        "name": '海亮转债'
     }
 ]
 
 
-def check_notices():
-    # target_date_str = '2023-03-17'
-    target_date_str = datetime.now().strftime("%Y-%m-%d")
-    target_date = parser.parse(target_date_str)
-    input_value = input("请输入下列序号执行操作:\n \
-        1.“持有标的公告” \n \
-        2.“预发转债标的公告” \n \
-        3.“ST公告” \n \
-    输入：")
-    if input_value == '1':
-        stocks = position_stocks
-        file_dir = f'{os.getcwd()}/data/position_notices/'
-        file_path = f'{file_dir}/{target_date_str}.xlsx'
-        print(f"一共有{len(stocks)}只股票")
-    elif input_value == '2':
-        stocks = pre_stocks
-        file_dir = f'{os.getcwd()}/data/pre_notices/'
-        file_path = f'{file_dir}/{target_date_str}.xlsx'
-        print(f"一共有{len(stocks)}只股票")
-    elif input_value == '3':
-        stocks = fetch_st_stocks()
-        file_dir = f'{os.getcwd()}/data/st_notices/'
-        file_path = f'{file_dir}/{target_date_str}.xlsx'
-        print(f"一共有{len(stocks)}只ST股票")
-    next_target_date = target_date + relativedelta(days=1)
-    update_count = 0
+class Notice():
+    file_dir = None
+    file_path = None
     update_stocks = []
-    is_after_target_day = True
     update_notices = []
-    for stock in stocks:
-        stock_name = stock.get('name')
-        stock_code = stock.get('code')
-        notice_list = fetch_notice_data(stock_code)
-        news_count = 0
-        for item in notice_list:
-            notice_date = parser.parse(item['notice_date'])
-            publish_date = parser.parse(item['eiTime'][0:19])
-            if (is_after_target_day or next_target_date >= publish_date) and publish_date >= target_date:
-                print(stock_name, stock_code, item['title'])
-                if news_count == 0:
-                    update_count += 1
-                news_count += 1
-                update_notices.append({
+    type: SourceType = None
+
+    def __init__(self) -> None:
+        target_date_str = datetime.now().strftime("%Y-%m-%d")
+        self.target_date_str = target_date_str
+        self.target_date = parser.parse(target_date_str)
+        target_time_str = datetime.now().strftime('%H:%M:%S')
+        self.target_time = target_time_str
+        self.is_after_target_day = True
+        self.suffix = f"(截至{target_time_str})" if target_time_str else ''
+        self.api = ApiEastMoney()
+
+    def set_stocks_source(self, type: SourceType = SourceType.POSITION):
+        self.type = type
+        if type == SourceType.POSITION:
+            print('===========================持仓股票===========================')
+            stocks = position_stocks
+            self.file_dir = f'{os.getcwd()}/data/position_notices/'
+            self.file_path = f'{self.file_dir}/{self.target_time}{self.suffix}.xlsx'
+        elif type == SourceType.PRE:
+            print('===========================配债股===========================')
+            stocks = pre_stocks
+            self.file_dir = f'{os.getcwd()}/data/pre_notices/'
+            self.file_path = f'{self.file_dir}/{self.target_date_str}{self.suffix}.xlsx'
+        elif type == SourceType.ST:
+            print('===========================ST股===========================')
+            stocks = fetch_st_stocks()
+            self.file_dir = f'{os.getcwd()}/data/st_notices/'
+            self.file_path = f'{self.file_dir}/{self.target_date_str}_ST股公告{self.suffix}.xlsx'
+        print(f"一共有{len(stocks)}只股票")
+        self.stocks = stocks
+
+    def get_stocks_notice(self):
+        next_target_date = self.target_date + relativedelta(days=1)
+        update_stocks = []
+        update_notices = []
+        for stock in self.stocks:
+            stock_name = stock.get('name')
+            stock_code = stock.get('code')
+            notice_list = fetch_notice_data(stock_code)
+            news_count = 0
+            for item in notice_list:
+                notice_date = parser.parse(item['notice_date'])
+                publish_date = parser.parse(item['eiTime'][0:19])
+                if (self.is_after_target_day or next_target_date >= publish_date) and publish_date >= self.target_date:
+                    print(stock_name, stock_code, item['title'])
+                    news_count += 1
+                    notice_detail = self.api.get_notice_detail(
+                        art_code=item['art_code']).get('data')
+                    update_notices.append({
+                        'stock_name': stock_name,
+                        'stock_code': stock_code,
+                        'title': item['title'],
+                        'notice_date': item['notice_date'],
+                        'eiTime': item['eiTime'],
+                        'attach_url': notice_detail['attach_url'],
+                        # 'link': f"https://data.eastmoney.com/notices/detail/{stock_code}/{item['art_code']}.html",
+                    })
+                    # if news_count > 2:
+                    #     break
+                else:
+                    break
+            if news_count > 0:
+                update_stocks.append({
                     'stock_name': stock_name,
                     'stock_code': stock_code,
-                    'title': item['title'],
-                    'notice_date': item['notice_date'],
-                    'eiTime': item['eiTime'],
-                    'link': f"https://data.eastmoney.com/notices/detail/{stock_code}/{item['art_code']}.html",
+                    'news_count': news_count,
                 })
-                # if news_count > 2:
-                #     break
-            else:
-                break
-        if news_count > 0:
-            update_stocks.append({
-                'stock_name': stock_name,
-                'stock_code': stock_code,
-                'news_count': news_count,
-            })
+        self.update_stocks = update_stocks
+        self.update_notices = update_notices
 
-    # file_summary_path = f'{file_dir}/summary.xlsx'
-    detail_map = {
-        'stock_name': '股票名称',
-        'stock_code': '股票代码',
-        'title': '公告标题',
-        'eiTime': '公告发布时间',
-        'notice_date': '公告日期',
-        'link': '公告链接',
-    }
-    summay_map = {
-        'stock_name': '股票名称',
-        'stock_code': '股票代码',
-        'news_count': '公告数量'
-    }
-    text = '之后' if is_after_target_day else '当天'
-    print(f"{target_date_str}{text}(截至{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})共有{update_count}只ST股更新了{len(update_notices)}条公告")
-    file_detail_data = pd.DataFrame(update_notices).rename(
-        columns=detail_map).reset_index(drop=True)
-    # print(file_detail_data)
-    file_summary_data = pd.DataFrame(update_stocks).rename(
-        columns=summay_map).reset_index(drop=True)
-    update_xlsx_file(file_path, file_detail_data, '公告明细')
-    update_xlsx_file(file_path, file_summary_data, '公告汇总')
+    def output_excel(self):
+        detail_map = {
+            'stock_name': '股票名称',
+            'stock_code': '股票代码',
+            'title': '公告标题',
+            'eiTime': '公告发布时间',
+            'notice_date': '公告日期',
+            'attach_url': '公告附件',
+            # 'link': '公告链接',
+        }
+        summay_map = {
+            'stock_name': '股票名称',
+            'stock_code': '股票代码',
+            'news_count': '公告数量'
+        }
+        text = '之后' if self.is_after_target_day else '当天'
+        print(f"{self.target_date_str}{text}(截至{datetime.now().strftime('%Y-%m-%d %H:%M:%S')})共有{len(self.update_stocks)}只股更新了{len(self.update_notices)}条公告")
+        if len(self.update_notices) == 0:
+            return
+        file_detail_data = pd.DataFrame(self.update_notices).rename(
+            columns=detail_map).reset_index(drop=True)
+        # print(file_detail_data)
+        file_summary_data = pd.DataFrame(self.update_stocks).rename(
+            columns=summay_map).reset_index(drop=True)
+        update_xlsx_file(self.file_path, file_detail_data, '公告明细')
+        update_xlsx_file(self.file_path, file_summary_data, '公告汇总')
+        print('===========================输出完成===========================\n')
+
+    def run(self, type: SourceType = SourceType.POSITION, *, after_run=False):
+        self.set_stocks_source(type)
+        self.get_stocks_notice()
+        self.output_excel()
+        if after_run:
+            self.after_run()
+
+    def run_all(self):
+        self.run(SourceType.POSITION)
+        self.run(SourceType.PRE)
+        self.run(SourceType.ST)
+        self.after_run()
+
+    def after_run(self):
+        if len(self.update_notices) == 0:
+            return
+        opt = input("是否commit当天数据:\n \
+            1: 是. -- Y \n \
+            2: 否. -- N \n \
+        输入：")
+        if opt == '1' or opt == "Y":
+            commit()
+
+
+def output_notice():
+    notice = Notice()
+    notice.run_all()
 
 
 if __name__ == '__main__':
-    check_notices()
+    output_notice()
